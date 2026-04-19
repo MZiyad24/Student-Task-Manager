@@ -3,6 +3,10 @@ import 'screens/task/task_screen.dart';
 import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'screens/login_screen.dart';
+import 'screens/signup_screen.dart';
+
+
 
 
 
@@ -42,7 +46,7 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: .fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: TaskScreen(), // Set the home to our TaskManagerScreen
+      home: const LoginScreen(), // Set the home to our TaskManagerScreen
     );
   }
 }
