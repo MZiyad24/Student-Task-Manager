@@ -1,5 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Task {
-  int? id;
+  String? id;
+  String? userId; // <--- ADD THIS
   String title;
   String? description;
   DateTime dueDate;
@@ -8,6 +11,7 @@ class Task {
 
   Task({
     this.id,
+    this.userId, // <--- ADD THIS
     required this.title,
     this.description,
     required this.dueDate,
@@ -15,25 +19,26 @@ class Task {
     this.isCompleted = false,
   });
 
-  // Convert Task to Map for Database
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      'userId': userId, // <--- ADD THIS
       'title': title,
       'description': description,
-      'dueDate': dueDate.toIso8601String(),
+      'dueDate': Timestamp.fromDate(dueDate),
       'priority': priority,
-      'isCompleted': isCompleted ? 1 : 0,
+      'isCompleted': isCompleted,
     };
   }
 
-  factory Task.fromMap(Map<String, dynamic> map) {
+  factory Task.fromMap(Map<String, dynamic> map, String documentId) {
     return Task(
-      id: map['id'],
-      title: map['title'],
+      id: documentId,
+      userId: map['userId'], // <--- ADD THIS
+      title: map['title'] ?? '',
       description: map['description'],
-      priority: map['priority'],
-      dueDate: DateTime.parse(map['dueDate']),
+      priority: map['priority'] ?? 'Medium',
+      dueDate: (map['dueDate'] as Timestamp).toDate(),
+      isCompleted: map['isCompleted'] ?? false,
     );
   }
 }

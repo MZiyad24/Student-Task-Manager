@@ -1,27 +1,38 @@
-import '../database/db_helper.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/task.dart';
 
-
 class TaskRepository {
-  Future<int> insert(Task task) async {
-    final db = await DBHelper.database;
-    return db.insert('tasks', task.toMap());
+
+  final CollectionReference _collection = 
+      FirebaseFirestore.instance.collection('tasks');
+  
+  String? get currentUserId => FirebaseAuth.instance.currentUser?.uid;
+
+  Future<void> insertTask(Task task) async {
+    task.userId = currentUserId;
+    await _collection.add(task.toMap());
   }
 
-  Future<List<Task>> getAll() async {
-    final db = await DBHelper.database;
-    final data = await db.query('tasks');
-    return data.map((e) => Task.fromMap(e)).toList();
+  Future<List<Task>> getTasks() async {
+    if (currentUserId == null) return [];
+
+    final QuerySnapshot snapshot = await _collection
+        .where('userId', isEqualTo: currentUserId)
+        .orderBy('dueDate') 
+        .get();
+    return snapshot.docs.map((doc) {
+      return Task.fromMap(doc.data() as Map<String, dynamic>, doc.id);
+    }).toList();
   }
 
-  Future<int> update(Task task) async {
-    final db = await DBHelper.database;
-    return db.update('tasks', task.toMap(), where: 'id = ?', whereArgs: [task.id]);
+  Future<void> updateTask(Task task) async {
+    if (task.id != null) {
+      await _collection.doc(task.id).update(task.toMap());
+    }
   }
 
-  Future<int> delete(int id) async {
-    final db = await DBHelper.database;
-    return db.delete('tasks', where: 'id = ?', whereArgs: [id]);
+  Future<void> deleteTask(String id) async {
+    await _collection.doc(id).delete();
   }
-
 }

@@ -1,7 +1,18 @@
 import 'package:flutter/material.dart';
-import 'screens/task_screen.dart'; // Import the task screen
+import 'screens/task/task_screen.dart';
+import 'dart:io';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+
+
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
@@ -31,7 +42,7 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: .fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: TaskManagerScreen(), // Set the home to our TaskManagerScreen
+      home: TaskScreen(), // Set the home to our TaskManagerScreen
     );
   }
 }
