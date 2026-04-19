@@ -7,10 +7,6 @@ class UserRepository {
       FirebaseFirestore.instance.collection('users');
   final auth.FirebaseAuth _auth = auth.FirebaseAuth.instance;
 
-  // login
-
-  // signup
-
   // get user
   Future<User?> getUserById(String id) async {
     final doc = await _userCollection.doc(id).get();

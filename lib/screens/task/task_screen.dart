@@ -48,14 +48,13 @@ class _TaskScreenState extends State<TaskScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Student Tasks"),
-        backgroundColor: Colors.grey[200], // Temporary color to see the boundaries
+        backgroundColor: Colors.grey[200],
         elevation: 1,
         actions: [
         IconButton(
           icon: const Icon(Icons.person, color: Colors.blue),
           tooltip: 'Profile',
           onPressed: () {
-            // This matches the name we set in main.dart routes
             Navigator.pushNamed(context, '/profile');
           },
         ),

@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
 import 'screens/task/task_screen.dart';
-import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
-
-
-
-
+import 'screens/profile/profile_screen.dart';
 
 
 void main() async {
@@ -27,7 +23,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -46,7 +41,15 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: .fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const LoginScreen(), // Set the home to our TaskManagerScreen
+      debugShowCheckedModeBanner: false,
+      title: 'Task Manager',
+      initialRoute: '/login', // Start here
+      routes: {
+        '/tasks': (context) => const TaskScreen(),
+        '/profile': (context) => const ProfileScreen(),
+        '/login': (context) => const LoginScreen(),
+        '/signup': (context) => const SignupScreen(),
+      },
     );
   }
 }

@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Task {
   String? id;
-  String? userId; // <--- ADD THIS
+  String? userId; 
   String title;
   String? description;
   DateTime dueDate;
@@ -11,7 +11,7 @@ class Task {
 
   Task({
     this.id,
-    this.userId, // <--- ADD THIS
+    this.userId, 
     required this.title,
     this.description,
     required this.dueDate,
@@ -21,7 +21,7 @@ class Task {
 
   Map<String, dynamic> toMap() {
     return {
-      'userId': userId, // <--- ADD THIS
+      'userId': userId,
       'title': title,
       'description': description,
       'dueDate': Timestamp.fromDate(dueDate),
@@ -33,7 +33,7 @@ class Task {
   factory Task.fromMap(Map<String, dynamic> map, String documentId) {
     return Task(
       id: documentId,
-      userId: map['userId'], // <--- ADD THIS
+      userId: map['userId'],
       title: map['title'] ?? '',
       description: map['description'],
       priority: map['priority'] ?? 'Medium',

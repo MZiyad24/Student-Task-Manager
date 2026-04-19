@@ -28,6 +28,10 @@ class _LoginScreenState extends State<LoginScreen> {
         password: passwordController.text.trim(),
       );
 
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/profile'); 
+      }
+
       setState(() {
         message = "Login Success ";
       });
@@ -168,7 +172,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 10),
 
-                  // 👇 NEW PART ONLY (Signup navigation)
                   TextButton(
                     onPressed: () {
                       Navigator.push(

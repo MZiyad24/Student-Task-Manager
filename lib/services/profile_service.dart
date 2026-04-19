@@ -13,8 +13,7 @@ class ProfileService {
     if (currentUser != null) {
       return await _userRepo.getUserById(currentUser.uid);
     }
-    return await _userRepo.getUserById("Q0FcJgWpRZM5jHgfs3eO");
-    // return null;
+    return null;
   }
 
   // Logout

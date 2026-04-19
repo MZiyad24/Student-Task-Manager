@@ -94,26 +94,27 @@ class _SignupScreenState extends State<SignupScreen> {
     }
 
     try {
-      UserCredential userCredential =
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
 
       String uid = userCredential.user!.uid;
 
       await FirebaseFirestore.instance.collection("users").doc(uid).set({
-        "fullName": fullName,
+        "name": fullName,
         "email": email,
         "studentId": studentId,
         "gender": gender,
-        "academicLevel": academicLevel,
+        "academicYear": academicLevel,
         "createdAt": DateTime.now(),
       });
 
       setState(() {
         message = "Signup Success ✔";
       });
+
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/login');
+      }
     } on FirebaseAuthException catch (e) {
       setState(() {
         message = e.message ?? "Signup Failed ❌";
@@ -238,10 +239,12 @@ class _SignupScreenState extends State<SignupScreen> {
                             isExpanded: true,
                             underline: const SizedBox(),
                             items: ["1", "2", "3", "4"]
-                                .map((e) => DropdownMenuItem(
-                                      value: e,
-                                      child: Text("Level $e"),
-                                    ))
+                                .map(
+                                  (e) => DropdownMenuItem(
+                                    value: e,
+                                    child: Text("Level $e"),
+                                  ),
+                                )
                                 .toList(),
                             onChanged: (val) =>
                                 setState(() => academicLevel = val!),
@@ -266,8 +269,9 @@ class _SignupScreenState extends State<SignupScreen> {
                     "Confirm Password",
                     confirmPasswordController,
                     obscureConfirmPassword,
-                    () => setState(() =>
-                        obscureConfirmPassword = !obscureConfirmPassword),
+                    () => setState(
+                      () => obscureConfirmPassword = !obscureConfirmPassword,
+                    ),
                   ),
 
                   const SizedBox(height: 25),
@@ -349,15 +353,16 @@ class _SignupScreenState extends State<SignupScreen> {
 
   // ---------------- Helpers ----------------
   Widget buildField(
-      String label, IconData icon, TextEditingController controller) {
+    String label,
+    IconData icon,
+    TextEditingController controller,
+  ) {
     return TextField(
       controller: controller,
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon, color: primaryColor),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
       ),
     );
   }
@@ -381,9 +386,7 @@ class _SignupScreenState extends State<SignupScreen> {
           ),
           onPressed: toggle,
         ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
       ),
     );
   }
