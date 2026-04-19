@@ -17,11 +17,11 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -40,7 +40,14 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: .fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: ProfileScreen(), // Set the home to our ProfileScreen
+      debugShowCheckedModeBanner: false,
+      title: 'Task Manager',
+      initialRoute: '/tasks', // Start here
+      routes: {
+        '/tasks': (context) => const TaskScreen(),
+        '/profile': (context) => const ProfileScreen(),
+        // '/login': (context) => const LoginScreen(),
+      },
     );
   }
 }

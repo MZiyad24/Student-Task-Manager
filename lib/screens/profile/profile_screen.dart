@@ -56,7 +56,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("My Profile")),
+      appBar: AppBar(
+        title: const Text("My Profile"),
+        backgroundColor: Colors.grey[200], // Temporary color to see the boundaries
+        elevation: 1,
+        actions: [
+        IconButton(
+          icon: const Icon(Icons.task, color: Colors.blue),
+          tooltip: 'Tasks',
+          onPressed: () {
+            // This matches the name we set in main.dart routes
+            Navigator.pushNamed(context, '/tasks');
+          },
+        ),
+      ],
+      ),
       body: FutureBuilder<User?>(
         future: _userFuture,
         builder: (context, snapshot) {
