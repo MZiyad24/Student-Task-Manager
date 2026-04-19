@@ -1,9 +1,8 @@
 class User {
-  int? id;
+  String? id;
   String studentId;
   String name;
   String email;
-  String password;
   String? gender;
   String? profilePicture;
   String? academicYear;
@@ -13,7 +12,6 @@ class User {
     required this.studentId,
     required this.name,
     required this.email,
-    required this.password,
     this.gender,
     this.profilePicture,
     this.academicYear,
@@ -21,24 +19,21 @@ class User {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
       'studentId': studentId,
       'name': name,
       'email': email,
-      'password': password,
       'gender': gender,
       'profilePicture': profilePicture,
       'academicYear': academicYear,
     };
   }
 
-  factory User.fromMap(Map<String, dynamic> map) {
+  factory User.fromMap(Map<String, dynamic> map, String documentId) {
     return User(
-      id: map['id'],
-      studentId: map['studentId'],
-      name: map['name'],
-      email: map['email'],
-      password: map['password'],
+      id: documentId,
+      studentId: map['studentId'] ?? '',
+      name: map['name'] ?? '',
+      email: map['email'] ?? '',
       gender: map['gender'],
       profilePicture: map['profilePicture'],
       academicYear: map['academicYear'],
