@@ -46,7 +46,21 @@ class _TaskScreenState extends State<TaskScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Student Tasks")),
+      appBar: AppBar(
+        title: const Text("Student Tasks"),
+        backgroundColor: Colors.grey[200], // Temporary color to see the boundaries
+        elevation: 1,
+        actions: [
+        IconButton(
+          icon: const Icon(Icons.person, color: Colors.blue),
+          tooltip: 'Profile',
+          onPressed: () {
+            // This matches the name we set in main.dart routes
+            Navigator.pushNamed(context, '/profile');
+          },
+        ),
+      ],
+      ),
 
       floatingActionButton: FloatingActionButton(
         onPressed: () => openForm(),
