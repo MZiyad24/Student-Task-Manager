@@ -26,6 +26,5 @@ class UserRepository {
       await _userCollection.doc(user.id).update(user.toMap());
     }
   }
-
   
 }

@@ -15,10 +15,10 @@ class TaskRepository {
   }
 
   Future<List<Task>> getTasks() async {
-    if (currentUserId == null) return [];
+    // if (currentUserId == null) return [];
 
     final QuerySnapshot snapshot = await _collection
-        .where('userId', isEqualTo: currentUserId)
+        // .where('userId', isEqualTo: currentUserId)
         .orderBy('dueDate') 
         .get();
     return snapshot.docs.map((doc) {

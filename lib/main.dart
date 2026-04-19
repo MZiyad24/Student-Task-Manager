@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'screens/task/task_screen.dart';
+import 'screens/profile/profile_screen.dart';
 import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-
-
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,7 +40,7 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: .fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: TaskScreen(), // Set the home to our TaskManagerScreen
+      home: ProfileScreen(), // Set the home to our ProfileScreen
     );
   }
 }
