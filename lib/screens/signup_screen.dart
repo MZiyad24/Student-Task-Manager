@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import '../providers/auth_provider.dart';
 import 'login_screen.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -94,34 +93,24 @@ class _SignupScreenState extends State<SignupScreen> {
     }
 
     try {
-      UserCredential userCredential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(email: email, password: password);
-
-      String uid = userCredential.user!.uid;
-
-      await FirebaseFirestore.instance.collection("users").doc(uid).set({
-        "name": fullName,
-        "email": email,
-        "studentId": studentId,
-        "gender": gender,
-        "academicYear": academicLevel,
-        "createdAt": DateTime.now(),
-      });
-
+      await AuthProvider().signup(
+        fullName: fullName,
+        email: email,
+        studentId: studentId,
+        password: password,
+        confirmPassword: confirmPassword,
+        gender: gender,
+        academicLevel: academicLevel,
+      );
       setState(() {
         message = "Signup Success ✔";
       });
-
       if (mounted) {
         Navigator.pushReplacementNamed(context, '/login');
       }
-    } on FirebaseAuthException catch (e) {
-      setState(() {
-        message = e.message ?? "Signup Failed ❌";
-      });
     } catch (e) {
       setState(() {
-        message = "Something went wrong ❌";
+        message = e.toString();
       });
     }
 

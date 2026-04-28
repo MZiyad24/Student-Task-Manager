@@ -1,38 +1,55 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../models/task.dart';
+import '../services/api.dart';
+import '../services/storage_service.dart';
+import 'dart:convert';
 
 class TaskRepository {
-
-  final CollectionReference _collection = 
-      FirebaseFirestore.instance.collection('tasks');
-  
-  String? get currentUserId => FirebaseAuth.instance.currentUser?.uid;
+  final ApiService _apiService = ApiService();
+  final StorageService _storageService = StorageService();
 
   Future<void> insertTask(Task task) async {
-    task.userId = currentUserId;
-    await _collection.add(task.toMap());
+    final token = await _storageService.getToken();
+    print("token in repo: ${token != null ? "[REDACTED]" : "None"}");
+    if (token == null) {
+      throw Exception("No authentication token found. Please login.");
+    }
+    print("the task to be added: ${task.toMap()}");
+
+    await _apiService.post('/tasks/add', task.toMap());
   }
 
   Future<List<Task>> getTasks() async {
-    if (currentUserId == null) return [];
+    final token = await _storageService.getToken();
+    if (token == null) {
+      throw Exception("No authentication token found. Please login.");
+    }
 
-    final QuerySnapshot snapshot = await _collection
-        .where('userId', isEqualTo: currentUserId)
-        // .orderBy('dueDate') 
-        .get();
-    return snapshot.docs.map((doc) {
-      return Task.fromMap(doc.data() as Map<String, dynamic>, doc.id);
-    }).toList();
+    final response = await _apiService.get('/tasks');
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return data.map((item) => Task.fromMap(item as Map<String, dynamic>, item['id'])).toList();
+    } else {
+      throw Exception("Failed to load tasks: ${response.statusCode}");
+    }
   }
 
   Future<void> updateTask(Task task) async {
+    final token = await _storageService.getToken();
+    if (token == null) {
+      throw Exception("No authentication token found. Please login.");
+    }
+
     if (task.id != null) {
-      await _collection.doc(task.id).update(task.toMap());
+      await _apiService.patch('/tasks/${task.id}', task.toMap());
     }
   }
 
   Future<void> deleteTask(String id) async {
-    await _collection.doc(id).delete();
+    final token = await _storageService.getToken();
+    if (token == null) {
+      throw Exception("No authentication token found. Please login.");
+    }
+
+    await _apiService.delete('/tasks/$id');
   }
 }

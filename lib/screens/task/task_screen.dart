@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; // Professional state management
 import '../../models/task.dart';
-import '../../services/task_service.dart';
+import '../../providers/task_provider.dart';
 import 'widgets/task_list.dart';
 import 'widgets/task_form.dart';
 
@@ -12,67 +13,98 @@ class TaskScreen extends StatefulWidget {
 }
 
 class _TaskScreenState extends State<TaskScreen> {
-  final TaskService service = TaskService();
-  List<Task> tasks = [];
-
   @override
   void initState() {
     super.initState();
-    loadTasks();
+    // Fetch tasks immediately when the screen loads
+    Future.microtask(() => 
+      context.read<TaskProvider>().fetchTasks()
+    );
   }
 
-  bool isLoading = true; // 1. Add a loading flag
+  void _openForm({Task? task}) {
+    // We no longer pass the 'service' to the form. 
+    // The form will use the Provider internally or via the callback.
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => TaskForm(
+        task: task,
+        onSave: (newTask) async {
+          final provider = context.read<TaskProvider>();
+          bool success;
+          
+          if (task == null) {
+            success = await provider.addTask(newTask);
+          } else {
+            // Update logic
+            await provider.updateTask(newTask);
+            success = true; 
+          }
 
-  Future<void> loadTasks() async {
-    setState(() => isLoading = true);
-    final data = await service.getAllTasks();
-    setState(() {
-      tasks = data;
-      isLoading = false; // 2. Turn off loading
-    });
-  }
-
-  Future<void> deleteTask(String id) async {
-    await service.deleteTask(id);
-    loadTasks();
-  }
-
-  void openForm({Task? task}) async {
-    await showTaskForm(context: context, task: task, service: service);
-
-    loadTasks(); // refresh after add/update
+          if (success && mounted) {
+            Navigator.pop(context);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Tasks synced with cloud")),
+            );
+          }
+        },
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    // Watch the TaskProvider for changes
+    final taskProvider = context.watch<TaskProvider>();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Student Tasks"),
-        backgroundColor: Colors.grey[200],
-        elevation: 1,
+        backgroundColor: Colors.white,
+        elevation: 0.5,
         actions: [
-        IconButton(
-          icon: const Icon(Icons.person, color: Colors.blue),
-          tooltip: 'Profile',
-          onPressed: () {
-            Navigator.pushNamed(context, '/profile');
-          },
+          IconButton(
+            icon: const Icon(Icons.person, color: Colors.blue),
+            onPressed: () => Navigator.pushNamed(context, '/profile'),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _openForm(),
+        backgroundColor: Colors.blue,
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
+      // Use Provider's loading and data states
+      body: taskProvider.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
+              onRefresh: () => taskProvider.fetchTasks(),
+              child: taskProvider.tasks.isEmpty
+                  ? _buildEmptyState()
+                  : TaskList(
+                      tasks: taskProvider.tasks,
+                      onDelete: (id) => taskProvider.removeTask(id),
+                      onEdit: (task) => _openForm(task: task),
+                    ),
+            ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return ListView( // ListView needed for RefreshIndicator to work
+      children: [
+        SizedBox(height: MediaQuery.of(context).size.height * 0.3),
+        const Center(
+          child: Column(
+            children: [
+              Icon(Icons.task_alt, size: 80, color: Colors.grey),
+              SizedBox(height: 10),
+              Text("No tasks yet. Tap + to start!"),
+            ],
+          ),
         ),
       ],
-      ),
-
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => openForm(),
-        child: const Icon(Icons.add),
-      ),
-
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : TaskList(
-              tasks: tasks,
-              onDelete: deleteTask,
-              onEdit: (task) => openForm(task: task),
-            ),
     );
   }
 }

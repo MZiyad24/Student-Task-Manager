@@ -1,44 +1,35 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Task {
-  String? id;
-  String? userId; 
+  String? id; 
   String title;
   String? description;
   DateTime dueDate;
   String priority;
-  bool isCompleted;
 
   Task({
-    this.id,
-    this.userId, 
+    this.id, 
     required this.title,
     this.description,
     required this.dueDate,
     required this.priority,
-    this.isCompleted = false,
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'userId': userId,
       'title': title,
       'description': description,
-      'dueDate': Timestamp.fromDate(dueDate),
+      'dueDate': dueDate.toIso8601String(),
       'priority': priority,
-      'isCompleted': isCompleted,
     };
   }
 
   factory Task.fromMap(Map<String, dynamic> map, String documentId) {
     return Task(
       id: documentId,
-      userId: map['userId'],
       title: map['title'] ?? '',
       description: map['description'],
       priority: map['priority'] ?? 'Medium',
-      dueDate: (map['dueDate'] as Timestamp).toDate(),
-      isCompleted: map['isCompleted'] ?? false,
+      dueDate: DateTime.parse(map['dueDate'] ?? DateTime.now().toIso8601String()),
     );
   }
 }

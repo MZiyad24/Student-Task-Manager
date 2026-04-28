@@ -1,102 +1,120 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../models/task.dart';
-import '../../../services/task_service.dart';
 
-Future<void> showTaskForm({
-  required BuildContext context,
-  Task? task,
-  required TaskService service,
-}) async {
-  final titleController = TextEditingController(text: task?.title ?? '');
-  final descController = TextEditingController(text: task?.description ?? '');
+class TaskForm extends StatefulWidget {
+  final Task? task;
+  final Function(Task) onSave;
 
-  String selectedPriority = task?.priority ?? 'High';
-  DateTime selectedDate = task?.dueDate ?? DateTime.now();
+  const TaskForm({super.key, this.task, required this.onSave});
 
-  return showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    builder: (_) {
-      return StatefulBuilder(
-        builder: (context, setStateSheet) {
-          return Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-              top: 20,
-              left: 20,
-              right: 20,
+  @override
+  State<TaskForm> createState() => _TaskFormState();
+}
+
+class _TaskFormState extends State<TaskForm> {
+  late TextEditingController _titleController;
+  late TextEditingController _descController;
+  late String _selectedPriority;
+  late DateTime _selectedDate;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: widget.task?.title ?? '');
+    _descController = TextEditingController(text: widget.task?.description ?? '');
+    _selectedPriority = widget.task?.priority ?? 'High';
+    _selectedDate = widget.task?.dueDate ?? DateTime.now();
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      // Handles keyboard overlap automatically
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+        top: 20, left: 20, right: 20,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            "Task Details", 
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: _titleController,
+            decoration: const InputDecoration(
+              labelText: "Title",
+              border: OutlineInputBorder(),
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(  // title input
-                  controller: titleController,
-                  decoration: const InputDecoration(labelText: "Title"),
-                ),
-
-                TextField(  // description input
-                  controller: descController,
-                  decoration: const InputDecoration(labelText: "Description"),
-                ),
-
-                ListTile(  // date picker
-                  title: Text(
-                    "Date: ${DateFormat('yyyy-MM-dd').format(selectedDate)}",
-                  ),
-                  trailing: const Icon(Icons.calendar_today),
-                  onTap: () async {
-                    DateTime? picked = await showDatePicker(
-                      context: context,
-                      initialDate: selectedDate,
-                      firstDate: DateTime.now(),
-                      lastDate: DateTime(2100),  
-                    );
-
-                    if (picked != null) {
-                      setStateSheet(() => selectedDate = picked);  // store date
-                    }
-                  },
-                ),
-
-                DropdownButton<String>(  // priority dropdown list
-                  value: selectedPriority,
-                  items: ['Low', 'Medium', 'High']
-                      .map((p) => DropdownMenuItem(
-                            value: p,
-                            child: Text(p),
-                          ))
-                      .toList(),
-                  onChanged: (val) {
-                    setStateSheet(() => selectedPriority = val!);
-                  },
-                ),
-
-                ElevatedButton(  // add/update button
-                  onPressed: () async {
-                    final taskObj = Task(
-                      id: task?.id,
-                      title: titleController.text,
-                      description: descController.text,
-                      priority: selectedPriority,
-                      dueDate: selectedDate,
-                    );
-
-                    if (task == null) {
-                      await service.addTask(taskObj);
-                    } else {
-                      await service.updateTask(taskObj);
-                    }
-
-                    Navigator.pop(context);
-                  },
-                  child: Text(task == null ? "Add Task" : "Update Task"),
-                ),
-              ],
+          ),
+          const SizedBox(height: 15),
+          TextField(
+            controller: _descController,
+            decoration: const InputDecoration(
+              labelText: "Description",
+              border: OutlineInputBorder(),
             ),
-          );
-        },
-      );
-    },
-  );
+            maxLines: 2,
+          ),
+          const SizedBox(height: 10),
+          ListTile(
+            title: Text("Due Date: ${DateFormat('yyyy-MM-dd').format(_selectedDate)}"),
+            leading: const Icon(Icons.calendar_month, color: Colors.blue),
+            onTap: () async {
+              DateTime? picked = await showDatePicker(
+                context: context,
+                initialDate: _selectedDate,
+                firstDate: DateTime.now(),
+                lastDate: DateTime(2100),
+              );
+              if (picked != null) setState(() => _selectedDate = picked);
+            },
+          ),
+          DropdownButtonFormField<String>(
+            value: _selectedPriority,
+            decoration: const InputDecoration(labelText: "Priority"),
+            items: ['Low', 'Medium', 'High']
+                .map((p) => DropdownMenuItem(value: p, child: Text(p)))
+                .toList(),
+            onChanged: (val) => setState(() => _selectedPriority = val!),
+          ),
+          const SizedBox(height: 25),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 15),
+                backgroundColor: Colors.blue,
+              ),
+              onPressed: () {
+                final taskObj = Task(
+                  id: widget.task?.id,
+                  title: _titleController.text,
+                  description: _descController.text,
+                  priority: _selectedPriority,
+                  dueDate: _selectedDate,
+                );
+                widget.onSave(taskObj);
+              },
+              child: Text(
+                widget.task == null ? "Add Task" : "Update Task",
+                style: const TextStyle(color: Colors.white),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
 }
