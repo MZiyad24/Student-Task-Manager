@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../../../models/task.dart';
+import '../../../providers/task_provider.dart';
 
 class TaskItem extends StatelessWidget {
   final Task task;
-  final Function(String) onDelete;
+  final Function(String)? onDelete; // nullable
   final Function(Task) onEdit;
 
   const TaskItem({
     super.key,
     required this.task,
-    required this.onDelete,
+    this.onDelete,
     required this.onEdit,
   });
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<TaskProvider>();
+
     return Card(
       child: ListTile(
         title: Text(task.title),
@@ -25,9 +29,29 @@ class TaskItem extends StatelessWidget {
 
         onTap: () => onEdit(task),
 
-        trailing: IconButton(
-          icon: const Icon(Icons.delete, color: Colors.red),
-          onPressed: () => onDelete(task.id!),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            //  Favorite button
+            IconButton(
+              icon: Icon(
+                task.isFavorite
+                   ? Icons.favorite
+                      : Icons.favorite_border,
+                   color: Colors.red,
+              ),
+              onPressed: () {
+                provider.toggleFavorite(task);
+              },
+            ),
+
+            // 🗑️ Delete button (only if available)
+            if (onDelete != null)
+              IconButton(
+                icon: const Icon(Icons.delete, color: Colors.red),
+                onPressed: () => onDelete!(task.id!),
+              ),
+          ],
         ),
       ),
     );

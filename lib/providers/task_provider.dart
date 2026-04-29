@@ -9,32 +9,30 @@ class TaskProvider with ChangeNotifier {
   bool _isLoading = false;
   String _errorMessage = "";
 
-  // Getters
   List<Task> get tasks => _tasks;
+
   bool get isLoading => _isLoading;
   String get errorMessage => _errorMessage;
 
-  
   Future<void> fetchTasks() async {
     _setLoading(true);
     _errorMessage = "";
-    
+
     try {
       _tasks = await _taskRepo.getTasks();
     } catch (e) {
       _errorMessage = e.toString().replaceAll("Exception: ", "");
-      _tasks = []; 
+      _tasks = [];
     } finally {
       _setLoading(false);
     }
   }
 
-  // 2. Add a Task
   Future<bool> addTask(Task task) async {
     _setLoading(true);
     try {
       await _taskRepo.insertTask(task);
-      await fetchTasks(); // Refresh list from server
+      await fetchTasks();
       return true;
     } catch (e) {
       _errorMessage = e.toString();
@@ -43,11 +41,12 @@ class TaskProvider with ChangeNotifier {
     }
   }
 
-  // 3. Update a Task (e.g., toggling completion)
   Future<void> updateTask(Task task) async {
     try {
       await _taskRepo.updateTask(task);
+
       int index = _tasks.indexWhere((t) => t.id == task.id);
+
       if (index != -1) {
         _tasks[index] = task;
         notifyListeners();
@@ -58,7 +57,6 @@ class TaskProvider with ChangeNotifier {
     }
   }
 
-  // 4. Delete a Task
   Future<void> removeTask(String id) async {
     try {
       await _taskRepo.deleteTask(id);
@@ -69,6 +67,19 @@ class TaskProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+
+List<Task> get favoriteTasks =>
+    _tasks.where((task) => task.isFavorite).toList();
+
+Future<void> toggleFavorite(Task task) async {
+  final newValue = !task.isFavorite;
+
+  await _taskRepo.toggleFavorite(task.id!, newValue);
+
+  task.isFavorite = newValue;
+  notifyListeners();
+}
 
   void _setLoading(bool value) {
     _isLoading = value;

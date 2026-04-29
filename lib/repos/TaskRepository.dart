@@ -25,6 +25,7 @@ class TaskRepository {
     }
 
     final response = await _apiService.get('/tasks');
+    
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
       return data.map((item) => Task.fromMap(item as Map<String, dynamic>, item['id'])).toList();
@@ -43,6 +44,12 @@ class TaskRepository {
       await _apiService.patch('/tasks/${task.id}', task.toMap());
     }
   }
+
+ Future<void> toggleFavorite(String id, bool value) async {
+  await _apiService.patch('/tasks/favorite/$id', {
+    'isFavorite': value,
+  });
+}
 
   Future<void> deleteTask(String id) async {
     final token = await _storageService.getToken();
