@@ -69,17 +69,27 @@ class TaskProvider with ChangeNotifier {
   }
 
 
-List<Task> get favoriteTasks =>
-    _tasks.where((task) => task.isFavorite).toList();
+  List<Task> get favoriteTasks =>
+      _tasks.where((task) => task.isFavorite).toList();
 
-Future<void> toggleFavorite(Task task) async {
-  final newValue = !task.isFavorite;
+  Future<void> toggleFavorite(Task task) async {
+    final newValue = !task.isFavorite;
 
-  await _taskRepo.toggleFavorite(task.id!, newValue);
+    await _taskRepo.toggleFavorite(task.id!, newValue);
 
-  task.isFavorite = newValue;
-  notifyListeners();
-}
+    task.isFavorite = newValue;
+    notifyListeners();
+  }
+
+  String calculateDeadline(DateTime dueDate) {
+    try {
+      return _taskRepo.calculateDeadline(dueDate);
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+      return _errorMessage;
+    }
+  }
 
   void _setLoading(bool value) {
     _isLoading = value;

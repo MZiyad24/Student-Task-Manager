@@ -59,4 +59,21 @@ class TaskRepository {
 
     await _apiService.delete('/tasks/$id');
   }
+
+  String calculateDeadline(DateTime dueDate) {
+    final now = DateTime.now();
+    final localDueDate = dueDate.toLocal();
+
+    final date1 = DateTime(now.year, now.month, now.day);
+    final date2 = DateTime(localDueDate.year, localDueDate.month, localDueDate.day);
+
+    final difference = date2.difference(date1).inDays;
+    if (difference == 0) {
+      return "Today";
+    } else if (difference < 0) {
+      return "Expired";
+    } else {
+      return "$difference days";
+  }
+    }
 }

@@ -33,7 +33,9 @@ class Task {
       title: map['title'] ?? '',
       description: map['description'],
       priority: map['priority'] ?? 'Medium',
-      dueDate: DateTime.parse(map['dueDate']),
+      dueDate: map['dueDate'] != null 
+        ? DateTime.parse(map['dueDate']).toLocal() 
+        : DateTime.now(),
       isFavorite: map['isFavorite'] ?? false,
       isCompleted: map['isCompleted'] ?? false,
     );

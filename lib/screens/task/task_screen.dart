@@ -4,6 +4,7 @@ import '../../models/task.dart';
 import '../../providers/task_provider.dart';
 import 'widgets/task_list.dart';
 import 'widgets/task_form.dart';
+import 'task_deadlines_screen.dart';
 
 class TaskScreen extends StatefulWidget {
   const TaskScreen({super.key});
@@ -58,6 +59,15 @@ class _TaskScreenState extends State<TaskScreen> {
         backgroundColor: Colors.white,
         elevation: 0.5,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.access_time_filled, color: Colors.blue),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const TaskListScreen()),
+              );
+            },
+          ),
           //  Favorites Button 
           IconButton(
             icon: const Icon(Icons.favorite, color: Colors.red),
