@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; // Add this
 import '../../models/user.dart';
-import '../../services/profile_service.dart';
 import 'widgets/profile_header.dart';
-import 'widgets/profile_info.dart'; // Make sure this matches your filename
+import 'widgets/profile_info.dart';
 import 'widgets/logout_button.dart';
 import 'widgets/edit_profile_button.dart';
 import 'widgets/edit_profile_form.dart';
+import '../../providers/user_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -15,106 +16,123 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final ProfileService _profileService = ProfileService();
-  late Future<User?> _userFuture;
-
   @override
   void initState() {
     super.initState();
-    _userFuture = _profileService.getCurrentUserProfile();
+    Future.microtask(() {
+      context.read<UserProvider>().fetchProfile();
+    }
+    );
   }
 
   void _showEditModal(User user) {
-  // 1. Capture the messenger while the context is still valid
-  final messenger = ScaffoldMessenger.of(context);
-
-  showModalBottomSheet(
+    showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (context) => EditProfileForm(
         user: user,
-        onSave: (updatedUser) async {
-          // 2. Perform the async database work
-          await _profileService.updateProfile(updatedUser);
-
-          // 3. Refresh the UI
-          setState(() {
-            _userFuture = _profileService.getCurrentUserProfile();
-          });
-
-          // 4. Use the captured messenger to show the SnackBar
-          // This works even if the modal is closed!
-          messenger.showSnackBar(
-            const SnackBar(content: Text("Profile updated successfully!")),
+        onSave: (updatedName, updatedGender, updatedLevel, updatedImage) async {
+          final success = await context.read<UserProvider>().updateProfile(
+            name: updatedName,
+            gender: updatedGender,
+            academicLevel: updatedLevel,
+            image: updatedImage,
           );
+
+          if(!mounted) return;
+          if (success && mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Profile updated successfully!")),
+            );
+          }
         },
       ),
     );
   }
 
-  // --- THIS IS THE MISSING METHOD CAUSING YOUR ERROR ---
   @override
   Widget build(BuildContext context) {
+    final userProvider = context.watch<UserProvider>();
+    final user = userProvider.user;
+    
+    print("the user in profile screen: ${user?.name}");
+
+    if (userProvider.isLoading) {
+    return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    if (user == null) {
+    return Scaffold(
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () => userProvider.fetchProfile(),
+          child: const Text("Retry Connection"),
+        ),
+      ),
+    );
+  }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("My Profile"),
-        backgroundColor: Colors.grey[200], // Temporary color to see the boundaries
         elevation: 1,
         actions: [
-        IconButton(
-          icon: const Icon(Icons.task, color: Colors.blue),
-          tooltip: 'Tasks',
-          onPressed: () {
-            // This matches the name we set in main.dart routes
-            Navigator.pushNamed(context, '/tasks');
-          },
-        ),
-      ],
+          IconButton(
+            icon: const Icon(Icons.task, color: Colors.blue),
+            onPressed: () => Navigator.pushNamed(context, '/tasks'),
+          ),
+        ],
       ),
-      body: FutureBuilder<User?>(
-        future: _userFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          final user = snapshot.data;
-          if (user == null) {
-            return const Center(child: Text("User not found."));
-          }
-
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              children: [
-                ProfileHeader(name: user.name, imageUrl: user.profilePicture),
-                EditProfileButton(onPressed: () => _showEditModal(user)),
-                const SizedBox(height: 20),
-                ProfileInfo(
-                  label: "Student ID",
-                  value: user.studentId,
-                  icon: Icons.badge_outlined,
+      // 4. Use Provider state instead of FutureBuilder
+      body: userProvider.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : user == null
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("User not found."),
+                      TextButton(
+                        onPressed: () => userProvider.fetchProfile(),
+                        child: const Text("Retry"),
+                      )
+                    ],
+                  ),
+                )
+              : SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      ProfileHeader(name: user.name, imageUrl: user.profilePicture != null 
+                      ? NetworkImage(user.profilePicture!) 
+                      : const AssetImage('assets/default_user.png') as ImageProvider),
+                      EditProfileButton(onPressed: () => _showEditModal(user)),
+                      const SizedBox(height: 20),
+                      ProfileInfo(
+                        label: "Student ID",
+                        value: user.studentId,
+                        icon: Icons.badge_outlined,
+                      ),
+                      ProfileInfo(
+                        label: "Academic Year",
+                        value: user.academicYear ?? "Not Specified",
+                        icon: Icons.school_outlined,
+                      ),
+                      ProfileInfo(
+                        label: "Gender",
+                        value: user.gender ?? "Not Specified",
+                        icon: Icons.person_outline,
+                      ),
+                      const SizedBox(height: 40),
+                      LogoutButton(onLogout: () async {
+                        // 5. Handled via your Auth logic 
+                        // (Make sure to clear UserProvider too)
+                        userProvider.clearUser();
+                        Navigator.pushReplacementNamed(context, '/login');
+                      }),
+                    ],
+                  ),
                 ),
-                ProfileInfo(
-                  label: "Academic Year",
-                  value: user.academicYear ?? "Not Specified",
-                  icon: Icons.school_outlined,
-                ),
-                ProfileInfo(
-                  label: "Gender",
-                  value: user.gender ?? "Not Specified",
-                  icon: Icons.person_outline,
-                ),
-                const SizedBox(height: 40),
-                LogoutButton(onLogout: () async {
-                  await _profileService.signOut();
-                  if (mounted) Navigator.pushReplacementNamed(context, '/login');
-                }),
-              ],
-            ),
-          );
-        },
-      ),
     );
   }
 }

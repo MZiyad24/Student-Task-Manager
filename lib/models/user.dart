@@ -1,42 +1,31 @@
 class User {
-  String? id;
-  String studentId;
-  String name;
-  String email;
-  String? gender;
-  String? profilePicture;
-  String? academicYear;
+  final String uid;
+  final String name;
+  final String studentId;
+  final String email;
+  final String academicYear;
+  final String gender;
+  final String? profilePicture;
 
   User({
-    this.id,
-    required this.studentId,
+    required this.uid,
     required this.name,
+    required this.studentId,
     required this.email,
-    this.gender,
+    required this.academicYear,
+    required this.gender,
     this.profilePicture,
-    this.academicYear,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'studentId': studentId,
-      'name': name,
-      'email': email,
-      'gender': gender,
-      'profilePicture': profilePicture,
-      'academicYear': academicYear,
-    };
-  }
-
-  factory User.fromMap(Map<String, dynamic> map, String documentId) {
-    return User(
-      id: documentId,
-      studentId: map['studentId'] ?? '',
-      name: map['name'] ?? '',
-      email: map['email'] ?? '',
-      gender: map['gender'],
-      profilePicture: map['profilePicture'],
-      academicYear: map['academicYear'],
-    );
-  }
+  factory User.fromMap(Map<String, dynamic> map) {
+  return User(
+    uid: map['uid'] ?? '',
+    name: map['name'] ?? 'No Name', 
+    studentId: map['studentId']?.toString() ?? '', // Safety first
+    email: map['email'] ?? '',
+    academicYear: map['academicYear']?.toString() ?? '', 
+    gender: map['gender'] ?? '',
+    profilePicture: map['profilePicture'],
+  );
+}
 }
