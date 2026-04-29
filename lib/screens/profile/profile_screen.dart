@@ -54,6 +54,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     final userProvider = context.watch<UserProvider>();
     final user = userProvider.user;
+    
     print("the user in profile screen: ${user?.name}");
 
     if (userProvider.isLoading) {
@@ -102,7 +103,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     children: [
-                      ProfileHeader(name: user.name, imageUrl: user.profilePicture),
+                      ProfileHeader(name: user.name, imageUrl: user.profilePicture != null 
+                      ? NetworkImage(user.profilePicture!) 
+                      : const AssetImage('assets/default_user.png') as ImageProvider),
                       EditProfileButton(onPressed: () => _showEditModal(user)),
                       const SizedBox(height: 20),
                       ProfileInfo(

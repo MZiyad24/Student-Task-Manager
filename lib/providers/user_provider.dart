@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../models/user.dart';
 import '../repos/UserRepository.dart';
 
@@ -33,7 +34,7 @@ class UserProvider with ChangeNotifier {
     String? name,
     String? gender,
     String? academicLevel,
-    File? image,
+    XFile? image,
   }) async {
     int? levelAsInt;
     if (academicLevel != null) {
