@@ -1,17 +1,18 @@
-
 class Task {
-  String? id; 
+  String? id;
   String title;
   String? description;
   DateTime dueDate;
   String priority;
+  bool isFavorite;
 
   Task({
-    this.id, 
+    this.id,
     required this.title,
     this.description,
     required this.dueDate,
     required this.priority,
+    this.isFavorite = false,
   });
 
   Map<String, dynamic> toMap() {
@@ -29,7 +30,8 @@ class Task {
       title: map['title'] ?? '',
       description: map['description'],
       priority: map['priority'] ?? 'Medium',
-      dueDate: DateTime.parse(map['dueDate'] ?? DateTime.now().toIso8601String()),
+      dueDate: DateTime.parse(map['dueDate']),
+      isFavorite: map['isFavorite'] ?? false,
     );
   }
 }

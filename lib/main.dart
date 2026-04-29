@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screens/task/task_screen.dart';
+import 'screens/task/favorite_tasks_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
 import 'screens/profile/profile_screen.dart';
@@ -55,6 +56,8 @@ class MyApp extends StatelessWidget {
         '/profile': (context) => const ProfileScreen(),
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignupScreen(),
+        '/favorites': (context) => const FavoriteTasksScreen(),
+      
       },
     );
   }

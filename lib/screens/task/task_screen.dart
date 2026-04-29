@@ -17,14 +17,10 @@ class _TaskScreenState extends State<TaskScreen> {
   void initState() {
     super.initState();
     // Fetch tasks immediately when the screen loads
-    Future.microtask(() => 
-      context.read<TaskProvider>().fetchTasks()
-    );
+    Future.microtask(() => context.read<TaskProvider>().fetchTasks());
   }
 
   void _openForm({Task? task}) {
-    // We no longer pass the 'service' to the form. 
-    // The form will use the Provider internally or via the callback.
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -33,13 +29,12 @@ class _TaskScreenState extends State<TaskScreen> {
         onSave: (newTask) async {
           final provider = context.read<TaskProvider>();
           bool success;
-          
+
           if (task == null) {
             success = await provider.addTask(newTask);
           } else {
-            // Update logic
             await provider.updateTask(newTask);
-            success = true; 
+            success = true;
           }
 
           if (success && mounted) {
@@ -55,7 +50,6 @@ class _TaskScreenState extends State<TaskScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Watch the TaskProvider for changes
     final taskProvider = context.watch<TaskProvider>();
 
     return Scaffold(
@@ -64,18 +58,28 @@ class _TaskScreenState extends State<TaskScreen> {
         backgroundColor: Colors.white,
         elevation: 0.5,
         actions: [
+          //  Favorites Button 
+          IconButton(
+            icon: const Icon(Icons.favorite, color: Colors.red),
+            onPressed: () {
+              Navigator.pushNamed(context, '/favorites');
+            },
+          ),
+
+          // 👤 Profile Button
           IconButton(
             icon: const Icon(Icons.person, color: Colors.blue),
             onPressed: () => Navigator.pushNamed(context, '/profile'),
           ),
         ],
       ),
+
       floatingActionButton: FloatingActionButton(
         onPressed: () => _openForm(),
         backgroundColor: Colors.blue,
         child: const Icon(Icons.add, color: Colors.white),
       ),
-      // Use Provider's loading and data states
+
       body: taskProvider.isLoading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
@@ -92,7 +96,7 @@ class _TaskScreenState extends State<TaskScreen> {
   }
 
   Widget _buildEmptyState() {
-    return ListView( // ListView needed for RefreshIndicator to work
+    return ListView(
       children: [
         SizedBox(height: MediaQuery.of(context).size.height * 0.3),
         const Center(
