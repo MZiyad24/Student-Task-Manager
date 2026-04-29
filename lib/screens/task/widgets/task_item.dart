@@ -24,7 +24,7 @@ class TaskItem extends StatelessWidget {
       child: ListTile(
         title: Text(task.title),
         subtitle: Text(
-          "${task.priority} • ${DateFormat('yyyy-MM-dd').format(task.dueDate)}",
+          "${task.priority} • ${DateFormat('yyyy-MM-dd').format(task.dueDate)} • ${task.isCompleted ? "Completed" : "Pending"}",
         ),
 
         onTap: () => onEdit(task),

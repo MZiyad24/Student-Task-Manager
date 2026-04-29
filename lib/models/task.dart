@@ -5,6 +5,7 @@ class Task {
   DateTime dueDate;
   String priority;
   bool isFavorite;
+  bool isCompleted;
 
   Task({
     this.id,
@@ -13,6 +14,7 @@ class Task {
     required this.dueDate,
     required this.priority,
     this.isFavorite = false,
+    this.isCompleted = false,
   });
 
   Map<String, dynamic> toMap() {
@@ -21,6 +23,7 @@ class Task {
       'description': description,
       'dueDate': dueDate.toIso8601String(),
       'priority': priority,
+      'isCompleted': isCompleted,
     };
   }
 
@@ -32,6 +35,7 @@ class Task {
       priority: map['priority'] ?? 'Medium',
       dueDate: DateTime.parse(map['dueDate']),
       isFavorite: map['isFavorite'] ?? false,
+      isCompleted: map['isCompleted'] ?? false,
     );
   }
 }

@@ -17,6 +17,7 @@ class _TaskFormState extends State<TaskForm> {
   late TextEditingController _descController;
   late String _selectedPriority;
   late DateTime _selectedDate;
+  late bool _isCompleted;
 
   @override
   void initState() {
@@ -25,6 +26,7 @@ class _TaskFormState extends State<TaskForm> {
     _descController = TextEditingController(text: widget.task?.description ?? '');
     _selectedPriority = widget.task?.priority ?? 'High';
     _selectedDate = widget.task?.dueDate ?? DateTime.now();
+    _isCompleted = widget.task?.isCompleted ?? false;
   }
 
   @override
@@ -88,6 +90,12 @@ class _TaskFormState extends State<TaskForm> {
                 .toList(),
             onChanged: (val) => setState(() => _selectedPriority = val!),
           ),
+          CheckboxListTile(
+            value: _isCompleted,
+            onChanged: (val) => setState(() => _isCompleted = val!),
+            title: const Text("Mark as Completed"),
+            controlAffinity: ListTileControlAffinity.leading,
+          ),
           const SizedBox(height: 25),
           SizedBox(
             width: double.infinity,
@@ -103,6 +111,7 @@ class _TaskFormState extends State<TaskForm> {
                   description: _descController.text,
                   priority: _selectedPriority,
                   dueDate: _selectedDate,
+                  isCompleted: _isCompleted,
                 );
                 widget.onSave(taskObj);
               },
