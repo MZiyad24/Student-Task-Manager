@@ -117,7 +117,7 @@ Future<String?> _uploadProfileImage(XFile pickedFile, String token) async {
       'file',
       bytes,
       filename: pickedFile.name,
-      contentType: MediaType('image', 'jpeg'), // Requires import 'package:http_parser/http_parser.dart'
+      contentType: MediaType('image', 'jpeg'),
     ));
 
     final streamedResponse = await request.send();
